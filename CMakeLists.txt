@@ -17,6 +17,8 @@ set(SOURCES
     src/utils/arena.cpp
     src/errors/error.cpp
     src/errors/diagnostics.cpp
+    src/lexer/token.cpp  
+    src/lexer/lexer.cpp
 )
 
 add_executable(xerith ${SOURCES})

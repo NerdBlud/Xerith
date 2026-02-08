@@ -1,0 +1,13 @@
+let version = 1.0;
+let greeting = "Hello, Xerith!";
+
+fn calculate_area(radius) {
+    let pi = 3.14159;
+    return pi * (radius * radius);
+}
+
+if (version >= 1.0) {
+    print greeting;
+} else {
+    print "Upgrade required.";
+}
