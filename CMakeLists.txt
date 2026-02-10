@@ -13,12 +13,18 @@ add_definitions(${LLVM_DEFINITIONS})
 
 set(SOURCES
     src/main.cpp
+
     src/utils/logging.cpp
     src/utils/arena.cpp
     src/errors/error.cpp
     src/errors/diagnostics.cpp
-    src/lexer/token.cpp  
+
+    src/lexer/token.cpp
     src/lexer/lexer.cpp
+
+    src/parser/ast.cpp
+    src/parser/parser.cpp
+    src/parser/ast_printer.cpp
 )
 
 add_executable(xerith ${SOURCES})
