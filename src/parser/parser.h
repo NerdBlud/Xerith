@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 #include "../lexer/token.h"
 #include "ast.h"
 
@@ -11,9 +12,16 @@ namespace xerith {
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens);
-    std::unique_ptr<Expr> parse();
+    
+    std::vector<std::unique_ptr<Stmt>> parse();
 
 private:
+    std::unique_ptr<Stmt> declaration();
+    std::unique_ptr<Stmt> var_declaration();
+    std::unique_ptr<Stmt> statement();
+    std::unique_ptr<Stmt> print_statement();
+    std::unique_ptr<Stmt> expression_statement();
+
     std::unique_ptr<Expr> expression();
     std::unique_ptr<Expr> equality();
     std::unique_ptr<Expr> comparison();
@@ -36,4 +44,4 @@ private:
 
 } // namespace xerith
 
-#endif 
+#endif
