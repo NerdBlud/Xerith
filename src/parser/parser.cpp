@@ -1,5 +1,6 @@
 #include "parser.h"
 #include <stdexcept>
+#include <iostream>
 
 namespace xerith {
 
@@ -8,7 +9,8 @@ Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
 std::vector<std::unique_ptr<Stmt>> Parser::parse() {
     std::vector<std::unique_ptr<Stmt>> statements;
     while (!is_at_end()) {
-        statements.push_back(declaration());
+        auto decl = declaration();
+        if (decl) statements.push_back(std::move(decl));
     }
     return statements;
 }
@@ -19,9 +21,10 @@ std::unique_ptr<Stmt> Parser::declaration() {
     try {
         if (match({TokenType::LET})) return var_declaration();
         return statement();
-    } catch (const std::exception& e) {
-        // Simple panic mode recovery
-        advance();
+    } catch (const std::runtime_error& error) {
+        // LOUD Error reporting: No more silent failures!
+        std::cerr << "[Parse Error] " << error.what() << std::endl;
+        synchronize();
         return nullptr;
     }
 }
@@ -63,7 +66,6 @@ std::unique_ptr<Expr> Parser::expression() {
 
 std::unique_ptr<Expr> Parser::equality() {
     auto expr = comparison();
-
     while (match({TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL})) {
         Token op = previous();
         auto right = comparison();
@@ -74,7 +76,6 @@ std::unique_ptr<Expr> Parser::equality() {
 
 std::unique_ptr<Expr> Parser::comparison() {
     auto expr = term();
-
     while (match({TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL})) {
         Token op = previous();
         auto right = term();
@@ -85,7 +86,6 @@ std::unique_ptr<Expr> Parser::comparison() {
 
 std::unique_ptr<Expr> Parser::term() {
     auto expr = factor();
-
     while (match({TokenType::MINUS, TokenType::PLUS})) {
         Token op = previous();
         auto right = factor();
@@ -96,7 +96,6 @@ std::unique_ptr<Expr> Parser::term() {
 
 std::unique_ptr<Expr> Parser::factor() {
     auto expr = unary();
-
     while (match({TokenType::SLASH, TokenType::STAR})) {
         Token op = previous();
         auto right = unary();
@@ -136,7 +135,7 @@ std::unique_ptr<Expr> Parser::primary() {
     throw std::runtime_error("Expect expression.");
 }
 
-// --- Navigation Helpers ---
+// --- Navigation & Helpers ---
 
 bool Parser::match(const std::vector<TokenType>& types) {
     for (auto type : types) {
@@ -173,6 +172,26 @@ Token Parser::previous() const {
 Token Parser::consume(TokenType type, const std::string& message) {
     if (check(type)) return advance();
     throw std::runtime_error(message);
+}
+
+void Parser::synchronize() {
+    advance();
+    while (!is_at_end()) {
+        if (previous().type == TokenType::SEMICOLON) return;
+        switch (peek().type) {
+            case TokenType::CLASS:
+            case TokenType::FUN:
+            case TokenType::LET:
+            case TokenType::FOR:
+            case TokenType::IF:
+            case TokenType::WHILE:
+            case TokenType::PRINT:
+            case TokenType::RETURN:
+                return;
+            default: break;
+        }
+        advance();
+    }
 }
 
 } // namespace xerith

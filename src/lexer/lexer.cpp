@@ -10,6 +10,7 @@ static const std::unordered_map<std::string, TokenType> keywords = {
     {"else",   TokenType::ELSE},
     {"false",  TokenType::FALSE},
     {"fn",     TokenType::FN},
+    {"fun",    TokenType::FUN},
     {"for",    TokenType::FOR},
     {"if",     TokenType::IF},
     {"nil",    TokenType::NIL},
@@ -17,6 +18,7 @@ static const std::unordered_map<std::string, TokenType> keywords = {
     {"return", TokenType::RETURN},
     {"let",    TokenType::LET},
     {"while",  TokenType::WHILE},
+    {"print",  TokenType::PRINT},
 };
 
 Lexer::Lexer(std::string source, std::string filename) 
@@ -44,6 +46,7 @@ void Lexer::scan_token() {
         case '-': add_token(TokenType::MINUS); break;
         case '+': add_token(TokenType::PLUS); break;
         case ';': add_token(TokenType::SEMICOLON); break;
+        
         case '*': add_token(TokenType::STAR); break;
 
         case '!': add_token(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG); break;
@@ -115,11 +118,18 @@ void Lexer::identifier() {
     while (isalnum(peek()) || peek() == '_') advance();
 
     std::string text = source.substr(start, current - start);
-    auto it = keywords.find(text);
-    TokenType type = (it != keywords.end()) ? it->second : TokenType::IDENTIFIER;
-    add_token(type);
-}
 
+    auto it = keywords.find(text);
+    TokenType type;
+    
+    if (it != keywords.end()) {
+        type = it->second; 
+    } else {
+        type = TokenType::IDENTIFIER; 
+    }
+
+    add_token(type); 
+}
 
 bool Lexer::is_at_end() const {
     return current >= (int)source.length();

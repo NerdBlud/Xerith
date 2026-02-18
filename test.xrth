@@ -1,0 +1,6 @@
+let message = "Xerith is alive!";
+let x = 50;
+let y = 10;
+print message;
+print x + y;
+print (x * 2) == 100;

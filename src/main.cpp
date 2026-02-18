@@ -4,34 +4,39 @@
 #include <vector>
 #include <string>
 
-#include "utils/logging.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include "parser/ast_printer.h"
+#include "runtime/interpreter.h"
 
 using namespace xerith;
 
 void run(const std::string& source, const std::string& filename) {
+    if (source.empty()) return;
+
+    // 1. Lexing
     Lexer lexer(source, filename);
     std::vector<Token> tokens = lexer.scan_tokens();
-
-    /*
-    std::cout << "--- SCAN RESULTS ---\n";
-    for (const auto& token : tokens) {
-        std::cout << token.to_string() << "\n";
-    }
-    */
-
-    // Phase 3: Parsing
+    
+    // 2. Parsing
     Parser parser(tokens);
-    std::unique_ptr<Expr> expression = parser.parse();
+    try {
+        std::vector<std::unique_ptr<Stmt>> statements = parser.parse();
 
-    if (expression) {
-        ASTPrinter printer;
-        std::cout << "\n--- PARSE RESULT (AST) ---\n";
-        std::cout << printer.print(expression.get()) << "\n";
-    } else {
-        std::cerr << "[ERROR] Could not parse the input source.\n";
+        if (statements.empty()) {
+            // If we have tokens but no statements, there's a syntax mismatch
+            if (tokens.size() > 1) {
+                std::cerr << "[Parser] Failed to generate statements from tokens." << std::endl;
+            }
+            return;
+        }
+
+        // 3. Interpreting
+        Interpreter interpreter;
+        interpreter.interpret(statements);
+
+    } catch (const std::exception& e) {
+        std::cerr << "[Critical Error] " << e.what() << std::endl;
     }
 }
 
@@ -39,30 +44,40 @@ void run_file(const char* path) {
     std::ifstream file(path);
     if (!file.is_open()) {
         std::cerr << "Could not open file: " << path << std::endl;
-        exit(74);
+        return;
     }
 
     std::stringstream buffer;
     buffer << file.rdbuf();
-    
-    std::cout << "[INFO] Compiling: " << path << "\n";
-    run(buffer.str(), path);
+    std::string content = buffer.str();
+
+    if (content.empty()) {
+        std::cerr << "File is empty: " << path << std::endl;
+        return;
+    }
+
+    run(content, path);
+}
+
+void run_prompt() {
+    std::cout << "Xerith REPL 1.0 - Type a command and end with ';'\n";
+    for (;;) {
+        std::cout << "xerith> ";
+        std::string line;
+        if (!std::getline(std::cin, line)) break;
+        if (line == "exit") break;
+        run(line, "repl");
+    }
 }
 
 int main(int argc, char* argv[]) {
     if (argc > 2) {
         std::cout << "Usage: xerith [script]" << std::endl;
-        exit(64);
+        return 64;
     } else if (argc == 2) {
         run_file(argv[1]);
     } else {
-        std::cout << "Xerith REPL - Enter expressions (Ctrl+C to exit)\n> ";
-        std::string line;
-        while (std::getline(std::cin, line)) {
-            run(line, "repl");
-            std::cout << "> ";
-        }
+        run_prompt();
     }
-
     return 0;
 }

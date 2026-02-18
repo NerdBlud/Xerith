@@ -13,13 +13,11 @@ public:
     std::vector<Token> scan_tokens();
 
 private:
-    // --- Existing Helpers ---
     bool is_at_end() const;
     char advance();
     void add_token(TokenType type);
     void scan_token();
 
-    // --- NEW Helpers (Add these!) ---
     char peek() const;
     bool match(char expected);
     void string();

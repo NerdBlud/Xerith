@@ -25,6 +25,9 @@ set(SOURCES
     src/parser/ast.cpp
     src/parser/parser.cpp
     src/parser/ast_printer.cpp
+
+    src/runtime/environment.cpp
+    src/runtime/interpreter.cpp
 )
 
 add_executable(xerith ${SOURCES})
