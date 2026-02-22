@@ -46,7 +46,6 @@ void Lexer::scan_token() {
         case '-': add_token(TokenType::MINUS); break;
         case '+': add_token(TokenType::PLUS); break;
         case ';': add_token(TokenType::SEMICOLON); break;
-        
         case '*': add_token(TokenType::STAR); break;
 
         case '!': add_token(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG); break;
@@ -55,7 +54,12 @@ void Lexer::scan_token() {
         case '>': add_token(match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER); break;
 
         case '/':
-            add_token(TokenType::SLASH);
+            if (match('/')) {
+                // A comment goes until the end of the line.
+                while (peek() != '\n' && !is_at_end()) advance();
+            } else {
+                add_token(TokenType::SLASH);
+            }
             break;
 
         case ' ':
@@ -99,14 +103,18 @@ void Lexer::string() {
         return;
     }
 
+    // The closing ".
     advance(); 
-    add_token(TokenType::STRING);
+
+    std::string value = source.substr(start + 1, current - start - 2);
+    tokens.emplace_back(TokenType::STRING, value, Span(filename, line, column - (current - start)));
 }
 
 void Lexer::number() {
     while (isdigit(peek())) advance();
 
-    if (peek() == '.' && isdigit(source[current + 1])) {
+     if (peek() == '.' && isdigit(peek_next())) {
+        // Consume the "."
         advance();
         while (isdigit(peek())) advance();
     }
@@ -118,15 +126,8 @@ void Lexer::identifier() {
     while (isalnum(peek()) || peek() == '_') advance();
 
     std::string text = source.substr(start, current - start);
-
     auto it = keywords.find(text);
-    TokenType type;
-    
-    if (it != keywords.end()) {
-        type = it->second; 
-    } else {
-        type = TokenType::IDENTIFIER; 
-    }
+    TokenType type = (it != keywords.end()) ? it->second : TokenType::IDENTIFIER;
 
     add_token(type); 
 }
@@ -143,6 +144,11 @@ char Lexer::advance() {
 char Lexer::peek() const {
     if (is_at_end()) return '\0';
     return source[current];
+}
+
+char Lexer::peek_next() const {
+    if (current + 1 >= (int)source.length()) return '\0';
+    return source[current + 1];
 }
 
 bool Lexer::match(char expected) {

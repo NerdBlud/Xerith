@@ -10,19 +10,22 @@ namespace xerith {
 class Lexer {
 public:
     Lexer(std::string source, std::string filename);
+    
+
     std::vector<Token> scan_tokens();
 
 private:
+    void scan_token();
+    void identifier();
+    void number();
+    void string();
+
     bool is_at_end() const;
     char advance();
-    void add_token(TokenType type);
-    void scan_token();
-
     char peek() const;
+    char peek_next() const;
     bool match(char expected);
-    void string();
-    void number();
-    void identifier();
+    void add_token(TokenType type);
 
     std::string source;
     std::string filename;

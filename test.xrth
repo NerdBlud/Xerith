@@ -1,6 +1,15 @@
-let message = "Xerith is alive!";
-let x = 50;
-let y = 10;
-print message;
-print x + y;
-print (x * 2) == 100;
+let age = 18;
+
+if (age >= 18) {
+    print "You can vote.";
+} else {
+    print "Too young!";
+}
+
+for (let i = 1; i <= 3; i = i + 1) {
+    if (i == 2) {
+        print "This is two!";
+    } else {
+        print i;
+    }
+}
