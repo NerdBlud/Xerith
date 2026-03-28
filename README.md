@@ -1,76 +1,47 @@
 # Xerith
 
-Xerith is a personal programming language project I’m building to learn more about how languages actually work under the hood. The main goal isn’t to compete with existing languages, but to design and implement something small, opinionated, and understandable from end to end.
+Xerith is a systems-oriented programming language designed for granular control over the compilation pipeline. This implementation serves as a technical exploration of recursive descent parsing, Abstract Syntax Tree (AST) architecture, and tree-walk evaluation.
 
-This repo is where I experiment with syntax, parsing, execution, and tooling, and where I document what works and what doesn’t.
+## Architecture
 
-## Trademark Notice
+The project is structured as a standard compiler front-end:
 
-The name **“Xerith”** is a registered trademark of NerdBlud.  
-You may fork, modify, and redistribute the **code** under the AGPL v3 license, but you **may not redistribute it under the name “Xerith”** or any confusingly similar name without explicit permission.  
+* **Lexer:** A hand-written scanner for deterministic tokenization.
+* **Parser:** A recursive descent implementation with operator precedence handling.
+* **AST Implementation:** A strongly-typed tree structure for intermediate representation.
+* **Interpreter:** A visitor-pattern based evaluator that decouples execution logic from node definitions.
 
-## Why I’m building this
+## Key Design Principles
 
-I want to go beyond just using programming languages and actually understand:
+* **Zero Dependencies:** The core implementation avoids external libraries to ensure a minimal, build-stable binary.
+* **AST Integrity:** Prioritizing strict node definitions to facilitate easier semantic analysis in future iterations.
+* **Transparent Tooling:** Integrated CLI for debugging token streams and AST dumps.
 
-* How lexers and parsers turn text into structures
-* How a language runtime executes code
-* How type systems (or no type systems) affect design
-* What makes a language pleasant or painful to use
-* How tooling (CLI, errors, formatting) changes the developer experience
+## Implementation Roadmap
 
-Xerith is basically my playground for all of that.
+- [x] Lexical analysis and Token stream generation
+- [x] Abstract Syntax Tree (AST) core nodes
+- [x] Visitor Pattern infrastructure for evaluation
+- [ ] Environment management and Lexical Scoping
+- [ ] Control flow primitives (If/While)
+- [ ] Function declarations and stack frame handling
+- [ ] Bytecode IR and Virtual Machine (Target)
 
-## Project goals
+## Build System
 
-Some things I’m aiming for:
+Xerith uses **CMake** for build orchestration and is developed primarily in a **C++17/20** environment.
 
-* A small, readable core language
-* Simple syntax that doesn’t try to be clever
-* Clear error messages (even if basic at first)
-* Fast iteration while experimenting with features
-* A codebase that I can actually understand later
+```bash
+mkdir build && cd build
+cmake ..
+make
+./xerith path/to/script.xrtx
+```
 
-## Non-goals (for now)
+## Trademark & Licensing
 
-Things I’m intentionally not focusing on:
+The name **“Xerith”** is a registered trademark of NerdBlud. 
+The source code is licensed under **AGPL v3**. You are free to fork and modify the implementation, but redistribution under the "Xerith" name or confusingly similar branding requires explicit permission.
 
-* Being faster than existing languages
-* Being production-ready
-* Having a huge standard library
-* Supporting every platform perfectly
-* Fancy IDE integrations
-
-If it works and teaches me something, that’s good enough.
-
-## What I plan to implement
-
-Rough roadmap (will change):
-
-* Basic lexer and parser
-* AST representation
-* Simple interpreter or bytecode VM
-* Variables and basic types
-* Functions
-* Control flow (if, while, etc.)
-* Basic error reporting
-* A small CLI to run `.xrtx` files
-
-## What I want to learn from this
-
-By the end of this project, I want to be able to:
-
-* Read other language implementations and understand them
-* Debug parsing and runtime issues more confidently
-* Make better design decisions when building tools
-* Have a clearer mental model of how languages actually execute code
-
-## Current state
-
-This project is early-stage and unstable. Things will break. Syntax will change. Files might get rewritten. That’s expected.
-
-If you’re looking for something stable, this isn’t it. If you’re curious about language internals, this might be interesting to follow.
-
-## Notes to future me
-
-Don’t over-engineer this. Keep it simple. Get something running, even if it’s ugly. Clean design can come later.
+---
+*Developed by nerdblud*
